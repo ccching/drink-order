@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>UNOCHA 烏弄訂飲料</title>
+    <title>NetAI訂飲料</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
       <div>
-        <p class="eyebrow">Southern Taiwan menu · since 25.08</p>
-        <h1>烏弄團體訂飲料</h1>
+        <p class="eyebrow"></p>
+        <h1>NetAI碩二進度報告5/22</h1>
       </div>
       <div class="header-summary" aria-live="polite">
         <span id="cartCount">0 杯</span>
@@ -124,21 +124,13 @@
           </div>
           <label class="field">
             <span>訂購人 <strong class="required-mark">必填</strong></span>
-            <input id="customerName" type="text" placeholder="姓名或部門" autocomplete="name" required />
-          </label>
-          <label class="field">
-            <span>聯絡方式</span>
-            <input id="customerContact" type="text" placeholder="電話、Line 或分機" />
-          </label>
-          <label class="field">
-            <span>取餐時間</span>
-            <input id="pickupTime" type="text" placeholder="例如：今天 15:30" />
+            <input id="customerName" type="text" placeholder="姓名" autocomplete="name" required />
           </label>
           <label class="field">
             <span>整筆備註</span>
-            <textarea id="orderNote" rows="2" placeholder="例如：公司團訂、外送地址"></textarea>
+            <textarea id="orderNote" rows="2" placeholder=""></textarea>
           </label>
-          <button class="primary-button" type="submit" id="submitOrderButton">送出到 Google Sheet</button>
+          <button class="primary-button" type="submit" id="submitOrderButton">送出</button>
           <p id="submitStatus" class="submit-status" role="status"></p>
         </form>
       </aside>

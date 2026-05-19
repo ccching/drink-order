@@ -64,9 +64,9 @@ Google Sheet 寫入仍然使用 Apps Script Web App URL，但這個 URL 只需�
 ```bash
 git init
 git add .
-git commit -m "Create UNOCHA order page"
+git commit -m "Create drink order page"
 git branch -M main
-git remote add origin https://github.com/你的帳號/unocha-order.git
+git remote add origin https://github.com/ccching/drink-order.git
 git push -u origin main
 ```
 
