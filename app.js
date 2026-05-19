@@ -533,6 +533,10 @@ function getSheetWebAppUrl() {
   return (window.UNOCHA_CONFIG?.sheetWebAppUrl || "").trim();
 }
 
+function getGoogleSheetUrl() {
+  return (window.UNOCHA_CONFIG?.googleSheetUrl || "").trim();
+}
+
 function getSheetUrlConfigError(sheetUrl) {
   if (!sheetUrl) {
     return "尚未設定後端 Google Sheet，請網站管理者先在 config.js 填入 Apps Script Web App URL。";
@@ -894,6 +898,26 @@ function validateCustomerName(showMessage = false) {
   return hasName;
 }
 
+function renderSubmitSuccess(status) {
+  const googleSheetUrl = getGoogleSheetUrl();
+  status.textContent = "已送出。";
+
+  if (!googleSheetUrl) {
+    status.append("請到 Google Sheet 確認訂單是否新增。");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = googleSheetUrl;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "Google Sheet";
+
+  status.append("請到 ");
+  status.append(link);
+  status.append(" 確認訂單是否新增。");
+}
+
 function submitToGoogleSheet(sheetUrl, payload) {
   return new Promise((resolve) => {
     const frameName = `unocha-submit-${Date.now()}`;
@@ -964,8 +988,8 @@ async function submitOrder(event) {
     await submitToGoogleSheet(sheetUrl, payload);
     state.cart = [];
     $("#customerForm").reset();
-    status.textContent = "已送出。請到 Google Sheet 確認訂單是否新增。";
     status.className = "submit-status success";
+    renderSubmitSuccess(status);
     renderAll();
   } catch (error) {
     status.textContent = `送出失敗：${error.message}`;

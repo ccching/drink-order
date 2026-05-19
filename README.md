@@ -25,6 +25,7 @@
 ```js
 window.UNOCHA_CONFIG = {
   sheetWebAppUrl: "https://script.google.com/macros/s/你的部署ID/exec",
+  googleSheetUrl: "https://docs.google.com/spreadsheets/d/你的試算表ID/edit",
 };
 ```
 

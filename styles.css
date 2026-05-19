@@ -580,6 +580,11 @@ button {
   color: var(--brand-dark);
 }
 
+.submit-status a {
+  color: var(--brand-dark);
+  font-weight: 900;
+}
+
 .submit-status.error {
   color: #a13d2d;
 }
