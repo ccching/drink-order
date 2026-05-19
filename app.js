@@ -927,6 +927,9 @@ function buildOrderPayload() {
   const total = state.cart.reduce((sum, item) => sum + item.lineTotal, 0);
   const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
   const pizzaVotes = Array.from(state.pizzaVotes);
+  const pizzaVotesText = pizzaVotes.join("、");
+  const orderNote = $("#orderNote").value.trim();
+  const noteWithPizza = [orderNote, `披薩投票：${pizzaVotesText}`].filter(Boolean).join("｜");
   return {
     orderId: `UNO-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`,
     createdAt: new Date().toISOString(),
@@ -934,12 +937,17 @@ function buildOrderPayload() {
     customer: {
       name: $("#customerName").value.trim(),
     },
-    note: $("#orderNote").value.trim(),
+    note: noteWithPizza,
+    orderNote,
     pizzaVotes,
-    pizzaVotesText: pizzaVotes.join("、"),
+    pizzaVotesText,
     itemCount: count,
     total,
-    items: state.cart,
+    items: state.cart.map((item) => ({
+      ...item,
+      orderPizzaVotes: pizzaVotes,
+      orderPizzaVotesText: pizzaVotesText,
+    })),
   };
 }
 
