@@ -308,12 +308,6 @@ button {
   padding: 18px;
 }
 
-.order-form {
-  position: sticky;
-  top: 14px;
-  z-index: 2;
-}
-
 .ghost-button {
   min-height: 34px;
   padding: 6px 10px;
@@ -593,10 +587,6 @@ button {
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
-  }
-
-  .order-form {
-    position: static;
   }
 }
 
