@@ -784,6 +784,7 @@ function renderCart() {
   $("#grandTotal").textContent = formatPrice(total);
   $("#cartTotal").textContent = formatPrice(total);
   $("#cartCount").textContent = `${count} 杯`;
+  $("#checkoutButton").disabled = count === 0;
 }
 
 function renderAll() {
@@ -877,6 +878,12 @@ function validateCustomerName(showMessage = false) {
   }
 
   return hasName;
+}
+
+function goToCheckout() {
+  const customerForm = $("#customerForm");
+  customerForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => $("#customerName").focus({ preventScroll: true }), 350);
 }
 
 async function submitOrder(event) {
@@ -1009,6 +1016,7 @@ function bindEvents() {
   });
 
   $("#addToCartButton").addEventListener("click", addCurrentItemToCart);
+  $("#checkoutButton").addEventListener("click", goToCheckout);
 
   $("#cartItems").addEventListener("click", (event) => {
     const button = event.target.closest("[data-remove-index]");

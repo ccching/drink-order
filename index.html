@@ -110,9 +110,18 @@
             <span>總計</span>
             <strong id="grandTotal">$0</strong>
           </div>
+          <button class="primary-button checkout-button" type="button" id="checkoutButton" disabled>
+            下一步：填寫訂購人資料
+          </button>
         </section>
 
         <form id="customerForm" class="submit-panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Step 4</p>
+              <h2>送出訂單</h2>
+            </div>
+          </div>
           <label class="field">
             <span>訂購人 <strong class="required-mark">必填</strong></span>
             <input id="customerName" type="text" placeholder="姓名或部門" autocomplete="name" required />
