@@ -581,8 +581,22 @@ button {
 }
 
 .submit-status a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--brand);
+  border-radius: 8px;
+  background: var(--brand-soft);
   color: var(--brand-dark);
   font-weight: 900;
+  text-decoration: none;
+}
+
+.submit-status a:hover {
+  background: var(--brand);
+  color: #fff;
 }
 
 .submit-status.error {
