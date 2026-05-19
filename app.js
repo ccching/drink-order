@@ -555,6 +555,13 @@ const state = {
 
 const $ = (selector) => document.querySelector(selector);
 const formatPrice = (value) => `$${value.toLocaleString("zh-TW")}`;
+const escapeHtml = (value) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 function getSheetWebAppUrl() {
   return (window.UNOCHA_CONFIG?.sheetWebAppUrl || "").trim();
@@ -814,12 +821,12 @@ function renderCart() {
         (item, index) => `
         <article class="cart-item">
           <div>
-            <h3>${item.drinkName} · ${item.size}</h3>
-            <p>${item.quantity} 杯 · ${item.temperature} · ${item.sugar} · ${item.ice}</p>
-            <p>${item.toppingsText}${item.note ? ` · ${item.note}` : ""}</p>
+            <h3>${escapeHtml(item.drinkName)} · ${escapeHtml(item.size)}</h3>
+            <p>${item.quantity} 杯 · ${escapeHtml(item.temperature)} · ${escapeHtml(item.sugar)} · ${escapeHtml(item.ice)}</p>
+            <p>${escapeHtml(item.toppingsText)}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</p>
             <p>${formatPrice(item.unitPrice)} / 杯，共 ${formatPrice(item.lineTotal)}</p>
           </div>
-          <button class="remove-item" type="button" aria-label="移除 ${item.drinkName}" data-remove-index="${index}">×</button>
+          <button class="remove-item" type="button" aria-label="移除 ${escapeHtml(item.drinkName)}" data-remove-index="${index}">×</button>
         </article>
       `,
       )
