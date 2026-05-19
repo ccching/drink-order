@@ -1,6 +1,6 @@
-# UNOCHA 烏弄訂飲料平台
+# NetAI 訂餐平台
 
-這是一個免安裝套件的靜態點餐頁，菜單資料依照你提供的「烏弄南區 25.08 起適用」圖片整理。前端可以選飲料、容量、甜度、冰塊、加料與數量，並即時計算價格；送出前也會要求投票披薩口味，每人至少 1 票、最多 4 票；送出後可透過 Google Apps Script 寫入 Google Sheet。
+前端可以選飲料、容量、甜度、冰塊、加料與數量，並即時計算價格；送出前也會要求投票披薩口味，每人至少 1 票、最多 4 票；送出後可透過 Google Apps Script 寫入 Google Sheet。
 
 ## 檔案
 
@@ -22,68 +22,11 @@
 8. 部署後複製 Web App URL。
 9. 打開 `config.js`，把 URL 填進 `sheetWebAppUrl`：
 
-```js
-window.UNOCHA_CONFIG = {
-  sheetWebAppUrl: "https://script.google.com/macros/s/你的部署ID/exec",
-  googleSheetUrl: "https://docs.google.com/spreadsheets/d/你的試算表ID/edit",
-};
-```
 
 披薩投票會寫進 `Orders` 分頁的 `pizzaVotes` 欄位，也會另外建立 `PizzaVotes` 分頁，一票一列方便統計。
 
-如果更新 `config.js` 或 `app.js` 後頁面沒有變化，請重新整理 GitHub Pages，或確認 `index.html` 裡的 `config.js?v=...` / `app.js?v=...` 版本參數已經跟著更新並推上 GitHub。
 
-不要貼 Apps Script 函式庫網址。錯誤範例：
 
-```text
-https://script.google.com/macros/library/d/...
-```
-
-這種 URL 不能接收前端送出的訂單。一定要使用「部署」→「網頁應用程式」產生、結尾是 `/exec` 的 Web App URL。
-
-## 使用方式
-
-直接用瀏覽器開啟 `index.html` 即可開始點餐。正式上線前請先完成 `config.js` 設定，否則訂單不會送到 Google Sheet。
-
-## 部署到 GitHub Pages
-
-可以。這個專案是純靜態網頁，直接放 GitHub Pages 就能運作。
-
-1. 到 GitHub 建立一個新的 repository，例如 `unocha-order`.
-2. 把本資料夾裡的檔案推上去，至少要包含：
-   - `index.html`
-   - `config.js`
-   - `styles.css`
-   - `app.js`
-   - `.nojekyll`
-   - `apps-script/Code.gs`
-   - `README.md`
-3. 進入 repository 的「Settings」→「Pages」。
-4. Source 選「Deploy from a branch」。
-5. Branch 選 `main`，資料夾選 `/root`。
-6. 儲存後等 GitHub Pages 部署完成。
-7. 開啟 GitHub 提供的網址，例如：
-
-```text
-https://你的帳號.github.io/unocha-order/
-```
-
-Google Sheet 寫入仍然使用 Apps Script Web App URL，但這個 URL 只需要由你放在 `config.js` 裡。使用者不需要知道 Google Sheet 或 Apps Script URL；他們只會看到點餐表單，送出後會由 `config.js` 裡設定的後端寫進你的 Google Sheet。
-
-### 用 Git 指令上傳
-
-如果你還沒有建立 Git repo，可以在這個資料夾執行：
-
-```bash
-git init
-git add .
-git commit -m "Create drink order page"
-git branch -M main
-git remote add origin https://github.com/ccching/drink-order.git
-git push -u origin main
-```
-
-如果 repo 已經存在，只要改成你的 GitHub repository URL。
 
 ## 修改菜單
 
