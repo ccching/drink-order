@@ -28,6 +28,14 @@ window.UNOCHA_CONFIG = {
 };
 ```
 
+不要貼 Apps Script 函式庫網址。錯誤範例：
+
+```text
+https://script.google.com/macros/library/d/...
+```
+
+這種 URL 不能接收前端送出的訂單。一定要使用「部署」→「網頁應用程式」產生、結尾是 `/exec` 的 Web App URL。
+
 ## 使用方式
 
 直接用瀏覽器開啟 `index.html` 即可開始點餐。正式上線前請先完成 `config.js` 設定，否則訂單不會送到 Google Sheet。

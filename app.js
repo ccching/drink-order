@@ -533,6 +533,22 @@ function getSheetWebAppUrl() {
   return (window.UNOCHA_CONFIG?.sheetWebAppUrl || "").trim();
 }
 
+function getSheetUrlConfigError(sheetUrl) {
+  if (!sheetUrl) {
+    return "尚未設定後端 Google Sheet，請網站管理者先在 config.js 填入 Apps Script Web App URL。";
+  }
+
+  if (sheetUrl.includes("/macros/library/")) {
+    return "config.js 目前填到 Apps Script 函式庫 URL，請改成 Web App 部署網址，格式應為 https://script.google.com/macros/s/部署ID/exec。";
+  }
+
+  if (!/^https:\/\/script\.google\.com\/(?:macros\/s|a\/macros\/[^/]+\/s)\/.+\/exec$/.test(sheetUrl)) {
+    return "config.js 的 Apps Script URL 格式不正確，請使用部署後結尾為 /exec 的 Web App URL。";
+  }
+
+  return "";
+}
+
 function getSelectedDrink() {
   return DRINKS.find((drink) => drink.id === state.selectedDrinkId) || DRINKS[0];
 }
@@ -932,8 +948,9 @@ async function submitOrder(event) {
     return;
   }
 
-  if (!sheetUrl) {
-    status.textContent = "尚未設定後端 Google Sheet，請網站管理者先在 config.js 填入 Apps Script Web App URL。";
+  const configError = getSheetUrlConfigError(sheetUrl);
+  if (configError) {
+    status.textContent = configError;
     status.className = "submit-status error";
     return;
   }
