@@ -29,7 +29,9 @@ window.UNOCHA_CONFIG = {
 };
 ```
 
-如果更新 `config.js` 後頁面沒有變化，請重新整理 GitHub Pages，或確認 `index.html` 裡的 `config.js?v=...` 版本參數已經跟著更新並推上 GitHub。
+披薩投票會寫進 `Orders` 分頁的 `pizzaVotes` 欄位，也會另外建立 `PizzaVotes` 分頁，一票一列方便統計。
+
+如果更新 `config.js` 或 `app.js` 後頁面沒有變化，請重新整理 GitHub Pages，或確認 `index.html` 裡的 `config.js?v=...` / `app.js?v=...` 版本參數已經跟著更新並推上 GitHub。
 
 不要貼 Apps Script 函式庫網址。錯誤範例：
 

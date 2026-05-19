@@ -926,6 +926,7 @@ function addCurrentItemToCart() {
 function buildOrderPayload() {
   const total = state.cart.reduce((sum, item) => sum + item.lineTotal, 0);
   const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+  const pizzaVotes = Array.from(state.pizzaVotes);
   return {
     orderId: `UNO-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`,
     createdAt: new Date().toISOString(),
@@ -934,7 +935,8 @@ function buildOrderPayload() {
       name: $("#customerName").value.trim(),
     },
     note: $("#orderNote").value.trim(),
-    pizzaVotes: Array.from(state.pizzaVotes),
+    pizzaVotes,
+    pizzaVotesText: pizzaVotes.join("、"),
     itemCount: count,
     total,
     items: state.cart,
