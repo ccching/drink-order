@@ -124,13 +124,21 @@
           </div>
           <label class="field">
             <span>訂購人 <strong class="required-mark">必填</strong></span>
-            <input id="customerName" type="text" placeholder="姓名" autocomplete="name" required />
+            <input id="customerName" type="text" placeholder="姓名或部門" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span>聯絡方式</span>
+            <input id="customerContact" type="text" placeholder="電話、Line 或分機" />
+          </label>
+          <label class="field">
+            <span>取餐時間</span>
+            <input id="pickupTime" type="text" placeholder="例如：今天 15:30" />
           </label>
           <label class="field">
             <span>整筆備註</span>
-            <textarea id="orderNote" rows="2" placeholder=""></textarea>
+            <textarea id="orderNote" rows="2" placeholder="例如：公司團訂、外送地址"></textarea>
           </label>
-          <button class="primary-button" type="submit" id="submitOrderButton">送出</button>
+          <button class="primary-button" type="submit" id="submitOrderButton">送出到 Google Sheet</button>
           <p id="submitStatus" class="submit-status" role="status"></p>
         </form>
       </aside>
