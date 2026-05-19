@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UNOCHA 烏弄訂飲料</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Southern Taiwan menu · since 25.08</p>
+        <h1>烏弄團體訂飲料</h1>
+      </div>
+      <div class="header-summary" aria-live="polite">
+        <span id="cartCount">0 杯</span>
+        <strong id="cartTotal">$0</strong>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="menu-pane" aria-labelledby="menuTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2 id="menuTitle">選擇飲料</h2>
+          </div>
+          <label class="search-box">
+            <span>搜尋</span>
+            <input id="searchInput" type="search" placeholder="輸入飲品或口味" autocomplete="off" />
+          </label>
+        </div>
+
+        <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="飲料分類"></div>
+        <div id="drinkGrid" class="drink-grid" aria-live="polite"></div>
+      </section>
+
+      <aside class="order-pane" aria-labelledby="orderTitle">
+        <form id="orderForm" class="order-form">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2 id="orderTitle">客製化</h2>
+            </div>
+            <button class="ghost-button" type="button" id="clearSelectionButton">清空</button>
+          </div>
+
+          <div class="selected-drink" id="selectedDrink">
+            <span>尚未選擇飲料</span>
+          </div>
+
+          <fieldset class="control-group" id="sizeGroup">
+            <legend>容量</legend>
+            <div class="segmented" id="sizeOptions"></div>
+          </fieldset>
+
+          <fieldset class="control-group" id="temperatureGroup">
+            <legend>溫度</legend>
+            <div class="segmented" id="temperatureOptions"></div>
+          </fieldset>
+
+          <fieldset class="control-group" id="sugarGroup">
+            <legend>甜度</legend>
+            <div class="segmented wrap" id="sugarOptions"></div>
+          </fieldset>
+
+          <fieldset class="control-group" id="iceGroup">
+            <legend>冰塊</legend>
+            <div class="segmented wrap" id="iceOptions"></div>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>加料</legend>
+            <div id="toppingOptions" class="topping-list"></div>
+            <p class="hint">一般配料第 2 份起每份 +$5，朵朵奶蓋另計。</p>
+          </fieldset>
+
+          <div class="quantity-row">
+            <label for="quantityInput">數量</label>
+            <div class="stepper">
+              <button type="button" id="decreaseQty" aria-label="減少數量">−</button>
+              <input id="quantityInput" type="number" min="1" max="99" value="1" inputmode="numeric" />
+              <button type="button" id="increaseQty" aria-label="增加數量">+</button>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>備註</span>
+            <textarea id="itemNote" rows="2" placeholder="例如：分開裝、不要珍珠"></textarea>
+          </label>
+
+          <div class="price-panel" aria-live="polite">
+            <span>小計</span>
+            <strong id="currentPrice">$0</strong>
+          </div>
+
+          <button class="primary-button" type="button" id="addToCartButton">加入訂單</button>
+        </form>
+
+        <section class="cart-panel" aria-labelledby="cartTitle">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h2 id="cartTitle">訂單</h2>
+            </div>
+            <button class="ghost-button" type="button" id="clearCartButton">清空</button>
+          </div>
+          <div id="cartItems" class="cart-items"></div>
+          <div class="cart-total">
+            <span>總計</span>
+            <strong id="grandTotal">$0</strong>
+          </div>
+        </section>
+
+        <form id="customerForm" class="submit-panel">
+          <label class="field">
+            <span>訂購人 <strong class="required-mark">必填</strong></span>
+            <input id="customerName" type="text" placeholder="姓名或部門" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span>聯絡方式</span>
+            <input id="customerContact" type="text" placeholder="電話、Line 或分機" />
+          </label>
+          <label class="field">
+            <span>取餐時間</span>
+            <input id="pickupTime" type="text" placeholder="例如：今天 15:30" />
+          </label>
+          <label class="field">
+            <span>整筆備註</span>
+            <textarea id="orderNote" rows="2" placeholder="例如：公司團訂、外送地址"></textarea>
+          </label>
+          <button class="primary-button" type="submit" id="submitOrderButton">送出到 Google Sheet</button>
+          <p id="submitStatus" class="submit-status" role="status"></p>
+        </form>
+      </aside>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
