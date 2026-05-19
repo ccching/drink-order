@@ -1038,6 +1038,11 @@ function goToCheckout() {
   $("#pizzaVoteTitle").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function goToCustomizerOnMobile() {
+  if (!window.matchMedia("(max-width: 980px)").matches) return;
+  $("#orderForm").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 async function submitOrder(event) {
   event.preventDefault();
   const status = $("#submitStatus");
@@ -1103,6 +1108,7 @@ function bindEvents() {
     state.selectedDrinkId = card.dataset.drinkId;
     resetItemChoices();
     renderAll();
+    goToCustomizerOnMobile();
   });
 
   $("#searchInput").addEventListener("input", (event) => {
