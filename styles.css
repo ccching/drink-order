@@ -290,6 +290,7 @@ button {
 
 .order-form,
 .cart-panel,
+.pizza-panel,
 .submit-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -304,7 +305,8 @@ button {
   padding: 18px;
 }
 
-.cart-panel {
+.cart-panel,
+.pizza-panel {
   padding: 18px;
 }
 
@@ -568,6 +570,54 @@ button {
   display: none;
 }
 
+.vote-count {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.pizza-vote-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pizza-vote-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.pizza-vote-option.is-selected {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.pizza-vote-option.is-disabled {
+  opacity: 0.48;
+}
+
+.pizza-vote-option span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .submit-status {
   min-height: 22px;
   margin: 0;
@@ -629,7 +679,8 @@ button {
   }
 
   .drink-grid,
-  .topping-list {
+  .topping-list,
+  .pizza-vote-list {
     grid-template-columns: 1fr;
   }
 

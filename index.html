@@ -111,14 +111,27 @@
             <strong id="grandTotal">$0</strong>
           </div>
           <button class="primary-button checkout-button" type="button" id="checkoutButton" disabled>
-            下一步：填寫訂購人資料
+            下一步：投票披薩口味
           </button>
+        </section>
+
+        <section class="pizza-panel" aria-labelledby="pizzaVoteTitle">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Step 4</p>
+              <h2 id="pizzaVoteTitle">投票披薩口味</h2>
+            </div>
+            <span class="vote-count" id="pizzaVoteCount">0 / 4 票</span>
+          </div>
+          <p class="hint">每人至少 1 票，最多 4 票。送出飲料前必須先投票。</p>
+          <div id="pizzaVoteOptions" class="pizza-vote-list" aria-live="polite"></div>
+          <p id="pizzaVoteHint" class="submit-status" role="status"></p>
         </section>
 
         <form id="customerForm" class="submit-panel">
           <div class="section-heading compact">
             <div>
-              <p class="eyebrow">Step 4</p>
+              <p class="eyebrow">Step 5</p>
               <h2>送出訂單</h2>
             </div>
           </div>
@@ -136,7 +149,7 @@
       </aside>
     </main>
 
-    <script src="config.js?v=20260520-2"></script>
-    <script src="app.js?v=20260520-2"></script>
+    <script src="config.js?v=20260520-3"></script>
+    <script src="app.js?v=20260520-3"></script>
   </body>
 </html>

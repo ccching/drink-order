@@ -11,6 +11,32 @@ const CATEGORIES = [
   "抱抱冬瓜",
 ];
 
+const PIZZA_FLAVORS = [
+  "夏威夷海鮮雙享披薩",
+  "漁夫燒肉雙享披薩",
+  "開運花生嫩雞披薩",
+  "招牌牛丼披薩",
+  "金賞烏魚子披薩",
+  "濃起司五重派對",
+  "法式白醬海鮮披薩",
+  "金沙蔬食披薩",
+  "炭火肉食披薩",
+  "蘋果肉桂披薩",
+  "墨西哥嗆辣披薩",
+  "老干媽風味雞肉披薩",
+  "龍蝦沙拉披薩",
+  "總匯披薩",
+  "西西里燻雞披薩",
+  "海鮮披薩",
+  "地中海漁夫披薩",
+  "夏威夷披薩",
+  "蔬菜披薩",
+  "義式海陸豪華披薩",
+  "洋食黃金脆雞披薩",
+  "波隆那臘腸披薩",
+  "日式燒肉披薩",
+];
+
 const DRINKS = [
   {
     id: "alishan-jinxuan",
@@ -522,6 +548,7 @@ const state = {
   sugar: "少糖",
   ice: "正常",
   toppings: new Set(),
+  pizzaVotes: new Set(),
   quantity: 1,
   cart: [],
 };
@@ -807,6 +834,33 @@ function renderCart() {
   $("#checkoutButton").disabled = count === 0;
 }
 
+function renderPizzaVotes() {
+  const count = state.pizzaVotes.size;
+  $("#pizzaVoteCount").textContent = `${count} / 4 票`;
+  $("#pizzaVoteOptions").innerHTML = PIZZA_FLAVORS.map((flavor) => {
+    const checked = state.pizzaVotes.has(flavor);
+    const disabled = !checked && count >= 4;
+    return `
+      <label class="pizza-vote-option ${checked ? "is-selected" : ""} ${disabled ? "is-disabled" : ""}">
+        <input type="checkbox" value="${flavor}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""} />
+        <span>${flavor}</span>
+      </label>
+    `;
+  }).join("");
+
+  const hint = $("#pizzaVoteHint");
+  if (count === 0) {
+    hint.textContent = "請至少投 1 票披薩口味。";
+    hint.className = "submit-status error";
+  } else if (count === 4) {
+    hint.textContent = "已投滿 4 票。";
+    hint.className = "submit-status success";
+  } else {
+    hint.textContent = `已投 ${count} 票，還可以再投 ${4 - count} 票。`;
+    hint.className = "submit-status";
+  }
+}
+
 function renderAll() {
   const drink = getSelectedDrink();
   normalizeChoicesForDrink(drink);
@@ -820,6 +874,7 @@ function renderAll() {
   renderToppings();
   renderCurrentPrice();
   renderCart();
+  renderPizzaVotes();
 }
 
 function resetItemChoices() {
@@ -879,6 +934,7 @@ function buildOrderPayload() {
       name: $("#customerName").value.trim(),
     },
     note: $("#orderNote").value.trim(),
+    pizzaVotes: Array.from(state.pizzaVotes),
     itemCount: count,
     total,
     items: state.cart,
@@ -898,6 +954,22 @@ function validateCustomerName(showMessage = false) {
   return hasName;
 }
 
+function validatePizzaVotes(showMessage = false) {
+  const count = state.pizzaVotes.size;
+  const isValid = count >= 1 && count <= 4;
+  const hint = $("#pizzaVoteHint");
+
+  if (!isValid) {
+    hint.textContent = count === 0 ? "請先投票披薩口味，至少 1 票。" : "披薩口味最多只能投 4 票。";
+    hint.className = "submit-status error";
+    if (showMessage) {
+      $("#pizzaVoteTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  return isValid;
+}
+
 function renderSubmitSuccess(status) {
   const googleSheetUrl = getGoogleSheetUrl();
   status.textContent = "";
@@ -915,7 +987,7 @@ function renderSubmitSuccess(status) {
   link.href = googleSheetUrl;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
-  link.textContent = "開啟 Google Sheet";
+  link.textContent = "開啟 Google Sheet 確認點餐內容";
 
   status.append(message);
   status.append(link);
@@ -953,9 +1025,7 @@ function submitToGoogleSheet(sheetUrl, payload) {
 }
 
 function goToCheckout() {
-  const customerForm = $("#customerForm");
-  customerForm.scrollIntoView({ behavior: "smooth", block: "start" });
-  setTimeout(() => $("#customerName").focus({ preventScroll: true }), 350);
+  $("#pizzaVoteTitle").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function submitOrder(event) {
@@ -975,6 +1045,12 @@ async function submitOrder(event) {
     return;
   }
 
+  if (!validatePizzaVotes(true)) {
+    status.textContent = "請先投票披薩口味，才能送出飲料訂單。";
+    status.className = "submit-status error";
+    return;
+  }
+
   const configError = getSheetUrlConfigError(sheetUrl);
   if (configError) {
     status.textContent = configError;
@@ -990,6 +1066,7 @@ async function submitOrder(event) {
   try {
     await submitToGoogleSheet(sheetUrl, payload);
     state.cart = [];
+    state.pizzaVotes.clear();
     $("#customerForm").reset();
     status.className = "submit-status success";
     renderSubmitSuccess(status);
@@ -1059,6 +1136,21 @@ function bindEvents() {
       state.toppings.delete(event.target.value);
     }
     renderAll();
+  });
+
+  $("#pizzaVoteOptions").addEventListener("change", (event) => {
+    if (event.target.type !== "checkbox") return;
+    if (event.target.checked) {
+      if (state.pizzaVotes.size >= 4) {
+        event.target.checked = false;
+        renderPizzaVotes();
+        return;
+      }
+      state.pizzaVotes.add(event.target.value);
+    } else {
+      state.pizzaVotes.delete(event.target.value);
+    }
+    renderPizzaVotes();
   });
 
   $("#quantityInput").addEventListener("input", (event) => {
