@@ -857,9 +857,7 @@ function buildOrderPayload() {
     source: "UNOCHA static order page",
     customer: {
       name: $("#customerName").value.trim(),
-      contact: $("#customerContact").value.trim(),
     },
-    pickupTime: $("#pickupTime").value.trim(),
     note: $("#orderNote").value.trim(),
     itemCount: count,
     total,
@@ -878,6 +876,37 @@ function validateCustomerName(showMessage = false) {
   }
 
   return hasName;
+}
+
+function submitToGoogleSheet(sheetUrl, payload) {
+  return new Promise((resolve) => {
+    const frameName = `unocha-submit-${Date.now()}`;
+    const iframe = document.createElement("iframe");
+    const form = document.createElement("form");
+    const input = document.createElement("input");
+
+    iframe.name = frameName;
+    iframe.hidden = true;
+
+    form.method = "POST";
+    form.action = sheetUrl;
+    form.target = frameName;
+    form.hidden = true;
+
+    input.type = "hidden";
+    input.name = "payload";
+    input.value = JSON.stringify(payload);
+
+    form.appendChild(input);
+    document.body.append(iframe, form);
+    form.submit();
+
+    setTimeout(() => {
+      form.remove();
+      iframe.remove();
+      resolve();
+    }, 1800);
+  });
 }
 
 function goToCheckout() {
@@ -915,17 +944,10 @@ async function submitOrder(event) {
   status.className = "submit-status";
 
   try {
-    await fetch(sheetUrl, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify(payload),
-    });
+    await submitToGoogleSheet(sheetUrl, payload);
     state.cart = [];
     $("#customerForm").reset();
-    status.textContent = "已送出。可以到https://docs.google.com/spreadsheets/d/1ZonRbltBzBWlYMxmASojeLkYEifJCChHezI6twGmBp8/edit?usp=sharing這裡確認有沒有成功送出";
+    status.textContent = "已送出。請到 Google Sheet 確認訂單是否新增。";
     status.className = "submit-status success";
     renderAll();
   } catch (error) {
