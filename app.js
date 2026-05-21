@@ -1,6 +1,6 @@
 const DEFAULT_MENU_FILE = "menus/93c.js";
 const DEFAULT_POLL_FILE = "polls/sandwich.js";
-const MENU_CACHE_BUSTER = "20260521-6";
+const MENU_CACHE_BUSTER = "20260521-7";
 
 let activeMenu = null;
 let activePoll = null;
@@ -685,16 +685,12 @@ function buildOrderPayload() {
     },
     pollVotes,
     pollVotesText,
-    pizzaVotes: pollVotes,
-    pizzaVotesText: pollVotesText,
     itemCount: count,
     total,
     items: state.cart.map((item) => ({
       ...item,
       orderPollVotes: pollVotes,
       orderPollVotesText: pollVotesText,
-      orderPizzaVotes: pollVotes,
-      orderPizzaVotesText: pollVotesText,
     })),
   };
 }
