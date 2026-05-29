@@ -1,6 +1,6 @@
 const DEFAULT_MENU_FILE = "menus/93c.js";
 const DEFAULT_POLL_FILE = "polls/sandwich.js";
-const MENU_CACHE_BUSTER = "20260529-1";
+const MENU_CACHE_BUSTER = "20260529-2";
 
 let activeMenu = null;
 let activePoll = null;
