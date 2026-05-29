@@ -49,8 +49,8 @@ window.DRINK_ORDER_MENU = {
       category: "經典配餐",
       name: "六塊麥克雞塊套餐",
       english: "6 pc Chicken McNuggets classic meal",
-      note: "需補 $18",
-      prices: { "套餐": 18 },
+      note: "需補 $20"
+      prices: { "套餐": 20 },
     },
     {
       id: "double-cheeseburger-classic-meal",
