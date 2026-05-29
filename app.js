@@ -1,6 +1,6 @@
 const DEFAULT_MENU_FILE = "menus/93c.js";
 const DEFAULT_POLL_FILE = "polls/sandwich.js";
-const MENU_CACHE_BUSTER = "20260521-7";
+const MENU_CACHE_BUSTER = "20260529-1";
 
 let activeMenu = null;
 let activePoll = null;
@@ -10,6 +10,30 @@ let TOPPINGS = [];
 let SUGAR_OPTIONS = [];
 let ICE_OPTIONS = [];
 let TEMPERATURE_OPTIONS = [];
+
+const DEFAULT_MENU_LABELS = {
+  itemNoun: "飲料",
+  itemUnit: "杯",
+  menuTitle: "選擇飲料",
+  orderTitle: "客製化",
+  cartTitle: "訂單",
+  submitTitle: "送出訂單",
+  size: "容量",
+  temperature: "溫度",
+  sugar: "甜度",
+  ice: "冰塊",
+  toppings: "加料",
+  selectedEmpty: "尚未選擇飲料",
+  emptyCart: "尚未加入任何飲料。",
+  noResults: "找不到符合的飲料。",
+  noToppings: "此菜單沒有加料選項。",
+  searchPlaceholder: "輸入飲品或口味",
+  itemNote: "備註",
+  itemNotePlaceholder: "例如：分開裝、不要珍珠",
+  quantity: "數量",
+  subtotal: "小計",
+  total: "總計",
+};
 
 const DEFAULT_POLL = {
   title: "投票披薩口味",
@@ -75,6 +99,19 @@ function getActivePollFile() {
   return (window.UNOCHA_CONFIG?.activePollFile || DEFAULT_POLL_FILE).trim() || DEFAULT_POLL_FILE;
 }
 
+function getMenuLabels() {
+  return { ...DEFAULT_MENU_LABELS, ...(activeMenu?.labels || {}) };
+}
+
+function isControlHidden(controlName) {
+  return Array.isArray(activeMenu?.hiddenControls) && activeMenu.hiddenControls.includes(controlName);
+}
+
+function isPollEnabled() {
+  const poll = getPollConfig();
+  return poll.enabled !== false && Array.isArray(poll.options) && poll.options.length > 0;
+}
+
 function withCacheBuster(path) {
   if (!MENU_CACHE_BUSTER || path.includes("?v=") || path.includes("&v=")) return path;
   return `${path}${path.includes("?") ? "&" : "?"}v=${MENU_CACHE_BUSTER}`;
@@ -116,12 +153,18 @@ function loadActivePoll() {
 
 function configureActivePoll(poll) {
   const configured = poll || {};
+  const enabled = configured.enabled !== false;
   const minSelections = Math.max(1, Number(configured.minSelections ?? DEFAULT_POLL.minSelections) || 1);
   const maxSelections = Math.max(minSelections, Number(configured.maxSelections ?? DEFAULT_POLL.maxSelections) || minSelections);
-  const options = Array.isArray(configured.options) && configured.options.length > 0 ? configured.options : DEFAULT_POLL.options;
+  const options = enabled
+    ? Array.isArray(configured.options) && configured.options.length > 0
+      ? configured.options
+      : DEFAULT_POLL.options
+    : [];
 
   activePoll = {
     id: configured.id || "poll",
+    enabled,
     title: configured.title || DEFAULT_POLL.title,
     itemName: configured.itemName || configured.title || DEFAULT_POLL.itemName,
     description: configured.description || DEFAULT_POLL.description,
@@ -172,6 +215,7 @@ function getPollVotes() {
 }
 
 function renderStoreMetadata() {
+  const labels = getMenuLabels();
   const pageTitleText = getPageTitle();
   const storeName = activeMenu?.storeName || "";
   const pageTitle = $("#pageTitle");
@@ -187,7 +231,7 @@ function renderStoreMetadata() {
 
   const subtitle = $("#storeSubtitle");
   if (subtitle && storeName) {
-    subtitle.textContent = `飲料是 ${storeName}！一人補助 $40`;
+    subtitle.textContent = activeMenu?.subtitle || `${labels.itemNoun}是 ${storeName}！一人補助 $40`;
   }
 
   const storeBadge = $("#activeStoreBadge");
@@ -195,6 +239,39 @@ function renderStoreMetadata() {
     storeBadge.textContent = storeName;
     storeBadge.hidden = false;
   }
+
+  const menuTitle = $("#menuTitle");
+  if (menuTitle) menuTitle.textContent = labels.menuTitle;
+  const orderTitle = $("#orderTitle");
+  if (orderTitle) orderTitle.textContent = labels.orderTitle;
+  const cartTitle = $("#cartTitle");
+  if (cartTitle) cartTitle.textContent = labels.cartTitle;
+  const searchInput = $("#searchInput");
+  if (searchInput) searchInput.placeholder = labels.searchPlaceholder;
+
+  const sizeLegend = document.querySelector("#sizeGroup legend");
+  if (sizeLegend) sizeLegend.textContent = labels.size;
+  const temperatureLegend = document.querySelector("#temperatureGroup legend");
+  if (temperatureLegend) temperatureLegend.textContent = labels.temperature;
+  const sugarLegend = document.querySelector("#sugarGroup legend");
+  if (sugarLegend) sugarLegend.textContent = labels.sugar;
+  const iceLegend = document.querySelector("#iceGroup legend");
+  if (iceLegend) iceLegend.textContent = labels.ice;
+  const toppingLegend = document.querySelector("#toppingOptions")?.closest("fieldset")?.querySelector("legend");
+  if (toppingLegend) toppingLegend.textContent = labels.toppings;
+  const quantityLabel = document.querySelector('label[for="quantityInput"]');
+  if (quantityLabel) quantityLabel.textContent = labels.quantity;
+  const itemNoteLabel = document.querySelector('label.field span');
+  const itemNoteInput = $("#itemNote");
+  if (itemNoteInput) {
+    itemNoteInput.placeholder = labels.itemNotePlaceholder;
+    const noteLabel = itemNoteInput.closest("label")?.querySelector("span");
+    if (noteLabel) noteLabel.textContent = labels.itemNote;
+  }
+  const pricePanelLabel = document.querySelector(".price-panel span");
+  if (pricePanelLabel) pricePanelLabel.textContent = labels.subtotal;
+  const cartTotalLabel = document.querySelector(".cart-total span");
+  if (cartTotalLabel) cartTotalLabel.textContent = labels.total;
 }
 
 function renderStartupError(error) {
@@ -340,37 +417,38 @@ function getFilteredDrinks() {
     const inCategory = state.activeCategory === "全部" || drink.category === state.activeCategory;
     const inSearch =
       !keyword ||
-      [drink.name, drink.english, drink.note, drink.category].join(" ").toLowerCase().includes(keyword);
+      [drink.name, drink.english, drink.note, drink.category].filter(Boolean).join(" ").toLowerCase().includes(keyword);
     return inCategory && inSearch;
   });
 }
 
 function renderDrinkCards() {
   const drinks = getFilteredDrinks();
+  const labels = getMenuLabels();
   $("#drinkGrid").innerHTML =
     drinks.length > 0
       ? drinks.map(renderDrinkCard).join("")
-      : '<p class="empty-cart">找不到符合的飲料。</p>';
+      : `<p class="empty-cart">${escapeHtml(labels.noResults)}</p>`;
 }
 
 function renderDrinkCard(drink) {
   const prices = Object.entries(drink.prices)
     .filter(([, price]) => typeof price === "number")
-    .map(([size, price]) => `<span>${size} ${formatPrice(price)}</span>`)
+    .map(([size, price]) => `<span>${escapeHtml(size)} ${formatPrice(price)}</span>`)
     .join("");
   const badges = [
     drink.recommended ? '<span class="badge">推薦</span>' : "",
     drink.hot ? '<span class="badge hot">可熱飲</span>' : "",
     drink.caffeineFree ? '<span class="badge caffeine">無咖啡因</span>' : "",
-    drink.fixedSugar || drink.fixedIce ? `<span class="badge fixed">${drink.fixedSugar || drink.fixedIce}</span>` : "",
+    drink.fixedSugar || drink.fixedIce ? `<span class="badge fixed">${escapeHtml(drink.fixedSugar || drink.fixedIce)}</span>` : "",
   ].join("");
 
   return `
-    <button class="drink-card ${drink.id === state.selectedDrinkId ? "is-selected" : ""}" type="button" data-drink-id="${drink.id}">
+    <button class="drink-card ${drink.id === state.selectedDrinkId ? "is-selected" : ""}" type="button" data-drink-id="${escapeHtml(drink.id)}">
       <span>
-        <h3>${drink.name}</h3>
-        <p class="english">${drink.english}</p>
-        <p class="note">${drink.note}</p>
+        <h3>${escapeHtml(drink.name)}</h3>
+        ${drink.english ? `<p class="english">${escapeHtml(drink.english)}</p>` : ""}
+        ${drink.note ? `<p class="note">${escapeHtml(drink.note)}</p>` : ""}
         <span class="badge-list">${badges}</span>
       </span>
       <span class="price-stack">${prices}</span>
@@ -379,36 +457,47 @@ function renderDrinkCard(drink) {
 }
 
 function renderSelectedDrink() {
+  const labels = getMenuLabels();
   const drink = getSelectedDrink();
   if (!drink) {
-    $("#selectedDrink").innerHTML = "<span>尚未載入菜單</span>";
+    $("#selectedDrink").innerHTML = `<span>${escapeHtml(labels.selectedEmpty)}</span>`;
     return;
   }
 
   $("#selectedDrink").innerHTML = `
-    <strong>${drink.name}</strong>
-    <span>${drink.category} · ${drink.note}</span>
+    <strong>${escapeHtml(drink.name)}</strong>
+    <span>${[drink.category, drink.note].filter(Boolean).map(escapeHtml).join(" · ")}</span>
   `;
 }
 
 function renderSizeOptions() {
+  const group = $("#sizeGroup");
+  const options = $("#sizeOptions");
   const drink = getSelectedDrink();
+  if (isControlHidden("size")) {
+    group.hidden = true;
+    options.innerHTML = "";
+    return;
+  }
+
+  group.hidden = false;
   if (!drink) {
-    $("#sizeOptions").innerHTML = "";
+    options.innerHTML = "";
     return;
   }
 
   const sizes = getAvailableSizes(drink);
-  $("#sizeOptions").innerHTML = ["M", "L"]
+  const displaySizes = activeMenu?.sizeOrder?.length ? activeMenu.sizeOrder : sizes;
+  options.innerHTML = displaySizes
     .map((size) => {
       const disabled = !sizes.includes(size);
       const price = drink.prices[size];
       return `
         <button type="button"
-          data-size="${size}"
+          data-size="${escapeHtml(size)}"
           class="${size === state.size ? "is-active" : ""}"
           ${disabled ? "disabled" : ""}>
-          ${disabled ? `${size} -` : `${size} ${formatPrice(price)}`}
+          ${disabled ? `${escapeHtml(size)} -` : `${escapeHtml(size)} ${formatPrice(price)}`}
         </button>
       `;
     })
@@ -419,7 +508,7 @@ function renderTemperatureOptions() {
   const group = $("#temperatureGroup");
   const options = $("#temperatureOptions");
 
-  if (activeMenu?.hideTemperature) {
+  if (activeMenu?.hideTemperature || isControlHidden("temperature")) {
     group.hidden = true;
     options.innerHTML = "";
     return;
@@ -441,62 +530,91 @@ function renderTemperatureOptions() {
 }
 
 function renderSugarOptions() {
+  const group = $("#sugarGroup");
+  const options = $("#sugarOptions");
   const drink = getSelectedDrink();
-  if (drink.fixedSugar) {
-    $("#sugarOptions").innerHTML = `<button type="button" class="is-active" data-sugar="${drink.fixedSugar}">${drink.fixedSugar}</button>`;
+  if (isControlHidden("sugar")) {
+    group.hidden = true;
+    options.innerHTML = "";
     return;
   }
 
-  $("#sugarOptions").innerHTML = SUGAR_OPTIONS.map(
+  group.hidden = false;
+  if (drink.fixedSugar) {
+    options.innerHTML = `<button type="button" class="is-active" data-sugar="${escapeHtml(drink.fixedSugar)}">${escapeHtml(drink.fixedSugar)}</button>`;
+    return;
+  }
+
+  options.innerHTML = SUGAR_OPTIONS.map(
     (sugar) => `
-      <button type="button" data-sugar="${sugar}" class="${sugar === state.sugar ? "is-active" : ""}">
-        ${sugar}
+      <button type="button" data-sugar="${escapeHtml(sugar)}" class="${sugar === state.sugar ? "is-active" : ""}">
+        ${escapeHtml(sugar)}
       </button>
     `,
   ).join("");
 }
 
 function renderIceOptions() {
+  const group = $("#iceGroup");
+  const options = $("#iceOptions");
   const drink = getSelectedDrink();
+  if (isControlHidden("ice")) {
+    group.hidden = true;
+    options.innerHTML = "";
+    return;
+  }
+
+  group.hidden = false;
   if (drink.fixedIce) {
-    $("#iceOptions").innerHTML = `<button type="button" class="is-active" data-ice="${drink.fixedIce}">${drink.fixedIce}</button>`;
+    options.innerHTML = `<button type="button" class="is-active" data-ice="${escapeHtml(drink.fixedIce)}">${escapeHtml(drink.fixedIce)}</button>`;
     return;
   }
 
   if (state.temperature === "熱飲") {
-    $("#iceOptions").innerHTML = '<button type="button" class="is-active" data-ice="不加冰">不加冰</button>';
+    options.innerHTML = '<button type="button" class="is-active" data-ice="不加冰">不加冰</button>';
     return;
   }
 
-  $("#iceOptions").innerHTML = ICE_OPTIONS.map(
+  options.innerHTML = ICE_OPTIONS.map(
     (ice) => `
-      <button type="button" data-ice="${ice}" class="${ice === state.ice ? "is-active" : ""}">
-        ${ice}
+      <button type="button" data-ice="${escapeHtml(ice)}" class="${ice === state.ice ? "is-active" : ""}">
+        ${escapeHtml(ice)}
       </button>
     `,
   ).join("");
 }
 
 function renderToppings() {
+  const labels = getMenuLabels();
+  const options = $("#toppingOptions");
+  const group = options.closest("fieldset");
   const hint = $("#toppingHint");
+  if (isControlHidden("toppings")) {
+    if (group) group.hidden = true;
+    options.innerHTML = "";
+    if (hint) hint.textContent = "";
+    return;
+  }
+
+  if (group) group.hidden = false;
   if (hint) {
     hint.textContent = activeMenu?.toppingPricing?.hint || "加料會依菜單價格自動加總。";
   }
 
   if (TOPPINGS.length === 0) {
-    $("#toppingOptions").innerHTML = '<p class="empty-cart">此菜單沒有加料選項。</p>';
+    options.innerHTML = `<p class="empty-cart">${escapeHtml(labels.noToppings)}</p>`;
     return;
   }
 
   const breakdown = getToppingBreakdown();
   const priceById = new Map(breakdown.map((topping) => [topping.id, topping.chargedPrice]));
-  $("#toppingOptions").innerHTML = TOPPINGS.map((topping) => {
+  options.innerHTML = TOPPINGS.map((topping) => {
     const checked = state.toppings.has(topping.id);
     const shownPrice = checked ? priceById.get(topping.id) : topping.price;
     return `
       <label class="topping-option">
-        <input type="checkbox" value="${topping.id}" ${checked ? "checked" : ""} />
-        <span>${topping.name}</span>
+        <input type="checkbox" value="${escapeHtml(topping.id)}" ${checked ? "checked" : ""} />
+        <span>${escapeHtml(topping.name)}</span>
         <small>+${shownPrice}</small>
       </label>
     `;
@@ -510,28 +628,31 @@ function renderCurrentPrice() {
 }
 
 function getCartCustomizationText(item) {
-  const parts = [`${item.quantity} 杯`];
-  if (item.temperature && item.temperature !== item.ice) {
+  const labels = getMenuLabels();
+  const parts = [`${item.quantity} ${labels.itemUnit}`];
+  if (!isControlHidden("temperature") && item.temperature && item.temperature !== item.ice) {
     parts.push(item.temperature);
   }
-  parts.push(item.sugar, item.ice);
+  if (!isControlHidden("sugar")) parts.push(item.sugar);
+  if (!isControlHidden("ice")) parts.push(item.ice);
   return parts.filter(Boolean).map(escapeHtml).join(" · ");
 }
 
 function renderCart() {
+  const labels = getMenuLabels();
   const cartItems = $("#cartItems");
   if (state.cart.length === 0) {
-    cartItems.innerHTML = '<p class="empty-cart">尚未加入任何飲料。</p>';
+    cartItems.innerHTML = `<p class="empty-cart">${escapeHtml(labels.emptyCart)}</p>`;
   } else {
     cartItems.innerHTML = state.cart
       .map(
         (item, index) => `
         <article class="cart-item">
           <div>
-            <h3>${escapeHtml(item.drinkName)} · ${escapeHtml(item.size)}</h3>
+            <h3>${escapeHtml(item.drinkName)}${isControlHidden("size") ? "" : ` · ${escapeHtml(item.size)}`}</h3>
             <p>${getCartCustomizationText(item)}</p>
-            <p>${escapeHtml(item.toppingsText)}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</p>
-            <p>${formatPrice(item.unitPrice)} / 杯，共 ${formatPrice(item.lineTotal)}</p>
+            ${[item.toppingsText, item.note].filter(Boolean).length ? `<p>${[item.toppingsText, item.note].filter(Boolean).map(escapeHtml).join(" · ")}</p>` : ""}
+            <p>${formatPrice(item.unitPrice)} / ${escapeHtml(labels.itemUnit)}，共 ${formatPrice(item.lineTotal)}</p>
           </div>
           <button class="remove-item" type="button" aria-label="移除 ${escapeHtml(item.drinkName)}" data-remove-index="${index}">×</button>
         </article>
@@ -544,12 +665,23 @@ function renderCart() {
   const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
   $("#grandTotal").textContent = formatPrice(total);
   $("#cartTotal").textContent = formatPrice(total);
-  $("#cartCount").textContent = `${count} 杯`;
+  $("#cartCount").textContent = `${count} ${labels.itemUnit}`;
   $("#checkoutButton").disabled = count === 0;
 }
 
 function renderPizzaVotes() {
   const poll = getPollConfig();
+  const panel = document.querySelector(".pizza-panel");
+  const submitStep = document.querySelector("#customerForm .eyebrow");
+  if (!isPollEnabled()) {
+    if (panel) panel.hidden = true;
+    $("#checkoutButton").textContent = "下一步：送出訂單";
+    if (submitStep) submitStep.textContent = "Step 4";
+    return;
+  }
+
+  if (panel) panel.hidden = false;
+  if (submitStep) submitStep.textContent = "Step 5";
   const count = state.pollVotes.size;
   const isSingleChoice = poll.maxSelections === 1;
 
@@ -621,8 +753,9 @@ function resetItemChoices() {
 function addCurrentItemToCart() {
   const item = calculateCurrentItem();
   const note = $("#itemNote").value.trim();
-  const toppingsText =
-    item.toppings.length > 0
+  const toppingsText = isControlHidden("toppings")
+    ? ""
+    : item.toppings.length > 0
       ? item.toppings.map((topping) => `${topping.name} +${topping.chargedPrice}`).join("、")
       : "無加料";
 
@@ -658,10 +791,11 @@ function buildOrderPayload() {
   const total = state.cart.reduce((sum, item) => sum + item.lineTotal, 0);
   const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
   const poll = getPollConfig();
-  const pollVotes = getPollVotes();
+  const pollEnabled = isPollEnabled();
+  const pollVotes = pollEnabled ? getPollVotes() : [];
   const pollVotesText = pollVotes.join("、");
   const orderNote = $("#orderNote").value.trim();
-  const noteWithPoll = [orderNote, `${poll.title}：${pollVotesText}`].filter(Boolean).join("｜");
+  const noteWithPoll = [orderNote, pollEnabled ? `${poll.title}：${pollVotesText}` : ""].filter(Boolean).join("｜");
   return {
     orderId: `${getOrderPrefix()}-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`,
     createdAt: new Date().toISOString(),
@@ -676,10 +810,11 @@ function buildOrderPayload() {
     note: noteWithPoll,
     orderNote,
     poll: {
-      title: poll.title,
-      itemName: poll.itemName,
-      minSelections: poll.minSelections,
-      maxSelections: poll.maxSelections,
+      enabled: pollEnabled,
+      title: pollEnabled ? poll.title : "",
+      itemName: pollEnabled ? poll.itemName : "",
+      minSelections: pollEnabled ? poll.minSelections : 0,
+      maxSelections: pollEnabled ? poll.maxSelections : 0,
       votes: pollVotes,
       votesText: pollVotesText,
     },
@@ -709,6 +844,7 @@ function validateCustomerName(showMessage = false) {
 }
 
 function validatePizzaVotes(showMessage = false) {
+  if (!isPollEnabled()) return true;
   const poll = getPollConfig();
   const count = state.pollVotes.size;
   const isValid = count >= poll.minSelections && count <= poll.maxSelections;
@@ -783,7 +919,8 @@ function submitToGoogleSheet(sheetUrl, payload) {
 }
 
 function goToCheckout() {
-  $("#pizzaVoteTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+  const target = isPollEnabled() ? $("#pizzaVoteTitle") : $("#customerForm");
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function goToCustomizerOnMobile() {
@@ -803,13 +940,13 @@ async function submitOrder(event) {
   }
 
   if (state.cart.length === 0) {
-    status.textContent = "請先把飲料加入訂單。";
+    status.textContent = `請先把${getMenuLabels().itemNoun}加入訂單。`;
     status.className = "submit-status error";
     return;
   }
 
-  if (!validatePizzaVotes(true)) {
-    status.textContent = `請先完成${getPollConfig().title}，才能送出飲料訂單。`;
+  if (isPollEnabled() && !validatePizzaVotes(true)) {
+    status.textContent = `請先完成${getPollConfig().title}，才能送出${getMenuLabels().itemNoun}訂單。`;
     status.className = "submit-status error";
     return;
   }
